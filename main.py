@@ -23,19 +23,21 @@ class Chatter:
     def collect(self):
         if self.file_name.endswith('.zip'):
             self.unzip()
-        sequence = ' ' * self.analysis_count  # previous char
+        self.sequence = ' ' * self.analysis_count  # previous char
         with open(self.file_name, 'r', encoding='utf-8') as file:
             for line in file:  # read line in our file
-                line = line[:-1]
-                for char in line:  # read char in our file
-                    if sequence in self.stat:  # if we already have char in the dictionary, we increase the vale
-                        if char in self.stat[sequence]:
-                            self.stat[sequence][char] += 1
-                        else:
-                            self.stat[sequence][char] = 1
-                    else:
-                        self.stat[sequence] = {char: 1}
-                    sequence = sequence[1:] + char  # in the previous char we enter the one that was in front of it
+                self._collect_for_line(line = line[:-1])
+
+    def _collect_for_line(self, line):
+        for char in line:  # read char in our file
+            if self.sequence in self.stat:  # if we already have char in the dictionary, we increase the vale
+                if char in self.stat[self.sequence]:
+                    self.stat[self.sequence][char] += 1
+                else:
+                    self.stat[self.sequence][char] = 1
+            else:
+                self.stat[self.sequence] = {char: 1}
+            self.sequence = self.sequence[1:] + char  # in the previous char we enter the one that was in front of it
 
     def prepare(self):
         self.totals = {}  # dictionary to count all char for prev_char
@@ -58,14 +60,7 @@ class Chatter:
         sequence = ' ' * analysis_count
         spaces_printed = 0
         while printed < N:
-            char_stat = self.stat_for_generate[sequence]
-            total = self.totals[sequence]
-            dice = randint(1, total)
-            pos = 0
-            for count, char in char_stat:
-                pos += count
-                if dice <= pos:
-                    break
+            char = self._get_char(char_stat=self.stat_for_generate[sequence], total= self.totals[sequence])
             if file:
                 file.write(char)
             else:
@@ -82,6 +77,15 @@ class Chatter:
             sequence = sequence[1:] + char
         if file:
             file.close()
+
+    def _get_char(self, char_stat, total):
+        dice = randint(1, total)
+        pos = 0
+        for count, char in char_stat:
+            pos += count
+            if dice <= pos:
+                break
+        return char
 
 
 file_name = str(input('Your zipfile name \n'))

@@ -48,8 +48,12 @@ class Chatter:
                 self.stat_for_generate[sequence].append([count, char])
             self.stat_for_generate[sequence].sort(reverse=True)
 
-    def Chat(self,N):
+    def Chat(self,N,out_file_name = None):
         printed = 0
+        if out_file_name is not None:
+            file = open(out_file_name,'w',encoding='utf-8')
+        else:
+            file = None
 
         sequence = ' ' * analysis_count
         spaces_printed = 0
@@ -62,14 +66,22 @@ class Chatter:
                 pos += count
                 if dice <= pos:
                     break
-            print(char, end='')
+            if file:
+                file.write(char)
+            else:
+                print(char, end='')
             if char == ' ':
                 spaces_printed += 1
                 if spaces_printed >= 10:
-                    print()
+                    if file:
+                        file.write('\n')
+                    else:
+                        print()
                     spaces_printed = 0
             printed += 1
             sequence = sequence[1:] + char
+        if file:
+            file.close()
 
 
 file_name = str(input('Your zipfile name \n'))
@@ -78,4 +90,4 @@ analysis_count = int(input('Count of sequence \n'))
 chatter = Chatter(file_name=file_name, analysis_count=analysis_count)
 chatter.collect()
 chatter.prepare()
-chatter.Chat(N=10000)
+chatter.Chat(N=10000,out_file_name='out.txt')
